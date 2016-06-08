@@ -51,10 +51,11 @@ extend google.protobuf.MethodOptions {
 
 <span class="pl-k">service</span> <span class="pl-en">SimpleService</span> {
 
-    <span class="pl-c">// this is http://c3po/service/SimpleService/call/Hello</span>
+    <span class="pl-c">// this should be http://yourdomain/service/r2d2/hello</span>
+    <span class="pl-c">// and the method should be GET</span>
     rpc Hello(HelloRequest) returns (HelloResponse) {
         <span class="pl-k">option</span> (mo)<span class="pl-e">.method</span> = <span class="pl-s">"GET"</span>;
-        <span class="pl-k">option</span> (mo)<span class="pl-e">.url</span>    = <span class="pl-s">"/service/r2d2/hellp"</span>
+        <span class="pl-k">option</span> (mo)<span class="pl-e">.url</span>    = <span class="pl-s">"/service/r2d2/hello"</span>
     };
 
 }</pre></div>
