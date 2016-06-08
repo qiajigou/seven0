@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package vipkid.r2d2.service;
+
+option java_multiple_files = true;
+option java_package = "com.vipkid.service.r2d2.protobuf.service";
+option java_outer_classname = "R2d2Proto";
+option objc_class_prefix = "Service";
+
+message HelloRequest {
+    string greeting = 1;
+}
+
+message HelloReply {
+    string reply = 1;
+}
+
+service R2d2Service {
+    // Touch
+    rpc Touch(HelloRequest) returns (HelloReply);
+}
