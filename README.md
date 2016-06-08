@@ -30,10 +30,11 @@ message HelloResponse {
 
 service SimpleService {
 
-    // this is http://c3po/service/SimpleService/call/Hello
+    // this should be http://yourdomain/service/r2d2/hello
+    // and the method should be GET
     rpc Hello(HelloRequest) returns (HelloResponse) {
         option (mo).method = "GET";
-        option (mo).url    = "/service/r2d2/hellp"
+        option (mo).url    = "/service/r2d2/hello"
     };
 
 }
