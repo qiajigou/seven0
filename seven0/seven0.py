@@ -7,6 +7,8 @@ import itertools
 from google.protobuf.compiler import plugin_pb2 as plugin
 from google.protobuf.descriptor_pb2 import DescriptorProto, EnumDescriptorProto
 
+from gen import Gen
+
 
 def gen(request, response):
     d = dict(messages=dict(), service=dict())
@@ -60,8 +62,11 @@ def gen(request, response):
 
         # Fill response
         f = response.file.add()
-        f.name = proto_file.name + '.json'
-        f.content = json.dumps(d, indent=4)
+        f.name = proto_file.name + '.py'
+
+        g = Gen()
+        g.load_from_dict(d)
+        f.content = g.gen_tmpl()
 
 
 def traverse(proto_file):

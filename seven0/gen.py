@@ -15,6 +15,9 @@ class Gen(object):
         j = json.loads(js)
         self.j = j
 
+    def load_from_dict(self, d):
+        self.j = d
+
     def parse_imports(self, impt):
         r = impt.split('.')
         obj = r[-1]
@@ -34,6 +37,8 @@ class Gen(object):
         t = []
         j = self.j
         impts = set()
+        impls = []
+        others = []
         mts = []
         service = j.get('service')
         service_name = service.keys()[0]
@@ -55,12 +60,18 @@ class Gen(object):
             mts.append(method_t)
             impts.add(method.get('input_type'))
             impts.add(method.get('output_type'))
+            impls.append('from impls import {method_name}Impl\n\r'.format(
+                method_name=method.get('name')))
 
         impts = [self.parse_imports(impt) for impt in impts]
-        impts.append('from seven0.utils import pb2json\n\r')
 
         t.extend(impts)
 
+        t.extend(impls)
+
+        others.append('from seven0.utils import pb2json\n\r')
+
+        t.extend(others)
         t.extend(mts)
 
         return ''.join(t)

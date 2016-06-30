@@ -13,6 +13,7 @@ method_tmpl = '''
 def {method_name}():
     # input type: {input_type}
     # output type: {output_type}
-    r = {output_obj}()
+    d = {method_name}Impl()
+    r = {output_type}(**d)
     return jsonify(pb2json(r))
 '''
