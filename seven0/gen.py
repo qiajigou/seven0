@@ -34,12 +34,21 @@ class Gen(object):
         return r[-1]
 
     def gen_tmpl(self):
-        t = []
+        j = self.j
+        service = j.get('service')
+
+        if not service:
+            return self.gen_messages()
+        return self.gen_service()
+
+    def gen_messages(self):
+        # j = self.j
+        return ''
+
+    def gen_service(self):
         j = self.j
         impts = set()
-        impls = []
-        others = []
-        mts = []
+        t, impls, others, mts = [], [], [], []
         service = j.get('service')
         service_name = service.keys()[0]
 
@@ -51,17 +60,19 @@ class Gen(object):
         for method in methods:
             input_type = self.parse_obj(method.get('input_type'))
             output_type = self.parse_obj(method.get('output_type'))
+            method_name = method.get('name')
             method_t = method_tmpl.format(
-                method_name=method.get('name'),
+                method_name=method_name,
                 input_type=input_type,
                 output_type=output_type,
                 output_obj=output_type,
+                impl_name=method_name.lower(),
             )
             mts.append(method_t)
-            impts.add(method.get('input_type'))
+            # impts.add(method.get('input_type'))
             impts.add(method.get('output_type'))
-            impls.append('from impls import {method_name}Impl\n\r'.format(
-                method_name=method.get('name')))
+            impls.append('from impls import {method_name}\n\r'.format(
+                method_name=method.get('name').lower()))
 
         impts = [self.parse_imports(impt) for impt in impts]
 

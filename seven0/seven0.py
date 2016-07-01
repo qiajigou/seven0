@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import json
 import itertools
 
 from google.protobuf.compiler import plugin_pb2 as plugin
@@ -10,60 +9,61 @@ from google.protobuf.descriptor_pb2 import DescriptorProto, EnumDescriptorProto
 from gen import Gen
 
 
-def gen(request, response):
+def gen(request, response, ext='.py'):
     d = dict(messages=dict(), service=dict())
     for proto_file in request.proto_file:
         key = 'messages'
         # Parse request
         for item, package in traverse(proto_file):
+            try:
+                if hasattr(item, 'method'):
+                    key = 'service'
 
-            if hasattr(item, 'method'):
-                key = 'service'
+                d[key][item.name] = dict(
+                    package=proto_file.package or '&lt;root&gt;',
+                    filename=proto_file.name
+                )
 
-            d[key][item.name] = dict(
-                package=proto_file.package or '&lt;root&gt;',
-                filename=proto_file.name
-            )
+                if hasattr(item, 'field'):
+                    d[key][item.name].update({
+                        'fields': [{'name': v.name}
+                                   for v in item.field]
+                    })
 
-            if hasattr(item, 'field'):
-                d[key][item.name].update({
-                    'fields': [{'name': v.name}
-                               for v in item.field]
-                })
+                if hasattr(item, 'value'):
+                    d[key][item.name].update({
+                        'values': [{'name': v.name,
+                                    'value': v.number}
+                                   for v in item.value]
+                    })
 
-            if hasattr(item, 'value'):
-                d[key][item.name].update({
-                    'values': [{'name': v.name,
-                                'value': v.number}
-                               for v in item.value]
-                })
+                if hasattr(item, 'method'):
+                    d[key][item.name].update({
+                        'methods': [{'name': v.name,
+                                     'input_type': v.input_type,
+                                     'output_type': v.output_type}
+                                    for v in item.method]
+                    })
 
-            if hasattr(item, 'method'):
-                d[key][item.name].update({
-                    'methods': [{'name': v.name,
-                                 'input_type': v.input_type,
-                                 'output_type': v.output_type}
-                                for v in item.method]
-                })
+                if isinstance(item, DescriptorProto):
+                    d[key][item.name].update({
+                        'type': 'Message',
+                        'properties': [{'name': f.name, 'type': int(f.type)}
+                                       for f in item.field]
+                    })
 
-            if isinstance(item, DescriptorProto):
-                d[key][item.name].update({
-                    'type': 'Message',
-                    'properties': [{'name': f.name, 'type': int(f.type)}
-                                   for f in item.field]
-                })
-
-            elif isinstance(item, EnumDescriptorProto):
-                d[key][item.name].update({
-                    'type': 'Enum',
-                    'values': [{'name': v.name, 'value': v.number}
-                               for v in item.value]
-                })
+                elif isinstance(item, EnumDescriptorProto):
+                    d[key][item.name].update({
+                        'type': 'Enum',
+                        'values': [{'name': v.name, 'value': v.number}
+                                   for v in item.value]
+                    })
+            except:
+                pass
 
         # Fill response
         f = response.file.add()
-        f.name = proto_file.name + '.py'
-
+        f.name = proto_file.name + ext
         g = Gen()
         g.load_from_dict(d)
         f.content = g.gen_tmpl()
